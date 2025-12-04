@@ -17,7 +17,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 20 14% 10%;
 
-    --primary: 25 85% 55%;
+    --primary: 142 76% 36%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 20 45% 96%;
@@ -26,15 +26,15 @@ All colors MUST be HSL.
     --muted: 20 30% 96%;
     --muted-foreground: 20 10% 45%;
 
-    --accent: 25 75% 95%;
-    --accent-foreground: 25 85% 25%;
+    --accent: 142 70% 95%;
+    --accent-foreground: 142 76% 36%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 20 20% 90%;
     --input: 20 20% 90%;
-    --ring: 25 85% 55%;
+    --ring: 142 76% 36%;
 
     --radius: 0.75rem;
 
@@ -101,5 +101,15 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

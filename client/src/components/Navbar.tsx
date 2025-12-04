@@ -24,6 +24,8 @@ const Navbar = () => {
     { name: "Home", path: "/" },
     { name: "Dashboard", path: "/dashboard" },
     { name: "Crop Recommender", path: "/crop-recommender" },
+    { name: "Fertilizer", path: "/fertilizer-prediction" },
+    { name: "Know the Rate", path: "/market-rates" },
     { name: "Weather", path: "/weather" },
   ];
 
@@ -44,8 +46,8 @@ const Navbar = () => {
                 key={item.path}
                 to={item.path}
                 className={`text-sm font-medium transition-colors hover:text-primary ${location.pathname === item.path
-                    ? "text-primary"
-                    : "text-muted-foreground"
+                  ? "text-primary"
+                  : "text-muted-foreground"
                   }`}
               >
                 {item.name}

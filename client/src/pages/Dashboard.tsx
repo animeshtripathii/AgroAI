@@ -1,50 +1,94 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, Sparkles, FileText, Cloud, MessageSquare, LogOut, UserCog } from "lucide-react";
+import { LayoutDashboard, Sparkles, FileText, Cloud, MessageSquare, UserCog, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { useEffect, useState } from "react";
+import api from "@/services/api";
+import axios from "axios";
+
+interface Recommendation {
+  _id: string;
+  crop: string;
+  date: string;
+  status: string;
+  image: string;
+  fieldName: string;
+  predictedCrop: string;
+  createdAt: string;
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<{ name: string; email: string; image?: string } | null>(null);
+  const [weather, setWeather] = useState<any>(null);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [healthSummary, setHealthSummary] = useState<string>("Loading insights...");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) {
       setUser(JSON.parse(userData));
-    } else {
-      navigate("/login");
     }
-  }, [navigate]);
+  }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/");
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 1. Fetch Weather
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(async (position) => {
+            const { latitude, longitude } = position.coords;
+            const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
+            const weatherRes = await axios.get(
+              `${import.meta.env.VITE_OPENWEATHER_API_URL}/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric`
+            );
+            setWeather(weatherRes.data);
+          });
+        }
 
-  const recommendations = [
-    {
-      crop: "Corn",
-      date: "Mar 15, 2024",
-      status: "Completed",
-      image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df"
-    },
-    {
-      crop: "Soybean",
-      date: "Mar 10, 2024",
-      status: "Completed",
-      image: "https://images.unsplash.com/photo-1587320885004-0de2722c3e3d"
-    },
-    {
-      crop: "Potatoes",
-      date: "Mar 01, 2024",
-      status: "Pending",
-      image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655"
-    },
-  ];
+        // 2. Fetch Recommendations History
+        const { data: historyData } = await api.get("/predict/history");
+
+        // Map history to display format
+        const formattedRecs = historyData.map((rec: any) => ({
+          _id: rec._id,
+          crop: rec.predictedCrop,
+          date: new Date(rec.createdAt).toLocaleDateString(),
+          status: "Completed", // Assuming all saved are completed
+          image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df", // Placeholder or dynamic
+          fieldName: rec.fieldName,
+          predictedCrop: rec.predictedCrop,
+          ...rec
+        }));
+
+        setRecommendations(formattedRecs);
+
+        // 3. Get Health Summary for the latest recommendation
+        if (historyData.length > 0) {
+          const latestRec = historyData[0];
+          try {
+            const { data: summaryData } = await api.post("/predict/health-summary", latestRec);
+            setHealthSummary(summaryData.summary);
+          } catch (err) {
+            console.error("Failed to fetch health summary", err);
+            setHealthSummary("Health insights unavailable.");
+          }
+        } else {
+          setHealthSummary("No soil data available yet.");
+        }
+
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   if (!user) return null;
 
@@ -54,7 +98,7 @@ const Dashboard = () => {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-72 min-h-[calc(100vh-64px)] border-r border-border bg-card">
+        <aside className="w-72 min-h-[calc(100vh-64px)] border-r border-border bg-card hidden md:block">
           <div className="p-6">
             <div className="flex items-center gap-3 mb-8">
               {user.image ? (
@@ -133,14 +177,27 @@ const Dashboard = () => {
 
             {/* Stats Grid */}
             <div className="grid md:grid-cols-3 gap-6 mb-8">
+              {/* Weather Card */}
               <Card className="p-6 relative overflow-hidden bg-gradient-to-br from-card to-card/50">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16" />
                 <h3 className="text-sm text-muted-foreground mb-2">Today's Weather</h3>
-                <div className="flex items-end gap-2 mb-2">
-                  <span className="text-4xl font-bold">24°C</span>
-                  <span className="text-2xl text-muted-foreground mb-1">☀️</span>
-                </div>
-                <p className="text-muted-foreground mb-3">Sunny with light winds</p>
+                {weather ? (
+                  <>
+                    <div className="flex items-end gap-2 mb-2">
+                      <span className="text-4xl font-bold">{Math.round(weather.main.temp)}°C</span>
+                      <img
+                        src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}.png`}
+                        alt="weather icon"
+                        className="w-10 h-10"
+                      />
+                    </div>
+                    <p className="text-muted-foreground mb-3 capitalize">{weather.weather[0].description}</p>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-2 mb-2">
+                    <Loader2 className="animate-spin" /> Loading weather...
+                  </div>
+                )}
                 <Link to="/weather">
                   <Button variant="link" className="p-0 h-auto font-semibold">
                     View Full Forecast
@@ -148,14 +205,19 @@ const Dashboard = () => {
                 </Link>
               </Card>
 
+              {/* Soil Health Card */}
               <Card className="p-6 relative overflow-hidden bg-gradient-to-br from-card to-card/50">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16" />
                 <h3 className="text-sm text-muted-foreground mb-2">Soil Health</h3>
                 <div className="flex items-end gap-2 mb-2">
-                  <span className="text-4xl font-bold">45%</span>
-                  <span className="text-lg text-muted-foreground mb-1">- Optimal</span>
+                  {/* Displaying latest crop or generic status */}
+                  <span className="text-2xl font-bold truncate">
+                    {recommendations.length > 0 ? recommendations[0].predictedCrop : "No Data"}
+                  </span>
                 </div>
-                <p className="text-muted-foreground mb-3">pH: 6.8</p>
+                <p className="text-muted-foreground mb-3 text-sm line-clamp-2">
+                  {healthSummary}
+                </p>
                 <Link to="/soil-reports">
                   <Button variant="link" className="p-0 h-auto font-semibold">
                     View Soil Report
@@ -163,16 +225,19 @@ const Dashboard = () => {
                 </Link>
               </Card>
 
+              {/* Active Recommendations Card */}
               <Card className="p-6 relative overflow-hidden bg-gradient-to-br from-card to-card/50">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16" />
                 <h3 className="text-sm text-muted-foreground mb-2">Active Recommendations</h3>
                 <div className="flex items-end gap-2 mb-2">
-                  <span className="text-4xl font-bold">3</span>
+                  <span className="text-4xl font-bold">{recommendations.length}</span>
                 </div>
-                <p className="text-muted-foreground mb-3">Awaiting your action</p>
-                <Button variant="link" className="p-0 h-auto font-semibold">
-                  View Recommendations
-                </Button>
+                <p className="text-muted-foreground mb-3">Total recommendations generated</p>
+                <Link to="/soil-reports">
+                  <Button variant="link" className="p-0 h-auto font-semibold">
+                    View Recommendations
+                  </Button>
+                </Link>
               </Card>
             </div>
 
@@ -180,21 +245,21 @@ const Dashboard = () => {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-foreground">Recent Recommendations</h2>
-                <Button variant="link" className="text-primary">
-                  View All History
-                </Button>
+                <Link to="/soil-reports">
+                  <Button variant="link" className="text-primary">
+                    View All History
+                  </Button>
+                </Link>
               </div>
 
               <div className="space-y-4">
-                {recommendations.map((rec, index) => (
+                {recommendations.slice(0, 3).map((rec, index) => (
                   <Card key={index} className="p-6 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <img
-                          src={rec.image}
-                          alt={rec.crop}
-                          className="w-16 h-16 rounded-lg object-cover"
-                        />
+                        <div className="w-16 h-16 rounded-lg bg-green-100 flex items-center justify-center text-2xl">
+                          🌱
+                        </div>
                         <div>
                           <h3 className="font-semibold text-foreground text-lg">{rec.crop}</h3>
                           <p className="text-muted-foreground text-sm">{rec.date}</p>
@@ -202,18 +267,23 @@ const Dashboard = () => {
                       </div>
                       <div className="flex items-center gap-4">
                         <Badge
-                          variant={rec.status === "Completed" ? "default" : "secondary"}
-                          className={rec.status === "Completed" ? "bg-green-100 text-green-700 hover:bg-green-100" : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"}
+                          variant="default"
+                          className="bg-green-100 text-green-700 hover:bg-green-100"
                         >
                           {rec.status}
                         </Badge>
-                        <Button variant="link" className="text-primary font-semibold">
-                          View Details
-                        </Button>
+                        <Link to="/soil-reports">
+                          <Button variant="link" className="text-primary font-semibold">
+                            View Details
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </Card>
                 ))}
+                {recommendations.length === 0 && (
+                  <p className="text-muted-foreground">No recommendations yet. Go to "Get Recommendation" to start.</p>
+                )}
               </div>
             </div>
           </div>

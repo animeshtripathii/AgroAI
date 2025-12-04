@@ -185,9 +185,7 @@ const Auth = () => {
                                     </button>
                                 </div>
                             </div>
-                            <div className="flex justify-end">
-                                <a href="#" className="text-sm text-primary hover:underline">Forgot Password?</a>
-                            </div>
+
                             <Button className="w-full h-11 text-base mt-2" size="lg" type="submit">Log In</Button>
                         </form>
 

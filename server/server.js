@@ -16,6 +16,7 @@ const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/predict', require('./routes/predictRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');

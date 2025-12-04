@@ -3,9 +3,12 @@ const path = require('path');
 
 const storage = multer.diskStorage({
     destination(req, file, cb) {
-        cb(null, 'uploads/');
+        const uploadPath = path.join(__dirname, '../uploads/');
+        console.log('Upload destination:', uploadPath);
+        cb(null, uploadPath);
     },
     filename(req, file, cb) {
+        console.log('Processing file:', file.originalname);
         cb(
             null,
             `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
@@ -21,7 +24,7 @@ function checkFileType(file, cb) {
     if (extname && mimetype) {
         return cb(null, true);
     } else {
-        cb('Images only!');
+        cb(new Error('Images only!'));
     }
 }
 

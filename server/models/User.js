@@ -19,6 +19,14 @@ const userSchema = mongoose.Schema(
             type: String,
             default: "",
         },
+        city: {
+            type: String,
+            required: [true, 'Please add a city'],
+        },
+        state: {
+            type: String,
+            required: [true, 'Please add a state'],
+        },
     },
     {
         timestamps: true,

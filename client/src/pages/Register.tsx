@@ -16,6 +16,8 @@ const Register = () => {
     const [formData, setFormData] = useState({
         name: "",
         email: "",
+        city: "",
+        state: "",
         password: "",
     });
 
@@ -98,6 +100,28 @@ const Register = () => {
                                     onChange={handleChange}
                                     required
                                 />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Input
+                                        name="city"
+                                        placeholder="City"
+                                        className="h-11 bg-muted/50"
+                                        value={formData.city}
+                                        onChange={handleChange}
+                                        required={!isLogin}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Input
+                                        name="state"
+                                        placeholder="State"
+                                        className="h-11 bg-muted/50"
+                                        value={formData.state}
+                                        onChange={handleChange}
+                                        required={!isLogin}
+                                    />
+                                </div>
                             </div>
                             <div className="space-y-2">
                                 <div className="relative">

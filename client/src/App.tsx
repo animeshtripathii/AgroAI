@@ -11,11 +11,14 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Weather from "./pages/Weather";
 import CropRecommender from "./pages/CropRecommender";
+import FertilizerPrediction from "./pages/FertilizerPrediction";
 import Results from "./pages/Results";
 import SoilReports from "./pages/SoilReports";
 import Feedback from "./pages/Feedback";
 import Contact from "./pages/Contact";
+import MarketRates from "./pages/MarketRates";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -28,14 +31,21 @@ const AnimatedRoutes = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Auth />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/weather" element={<Weather />} />
-        <Route path="/crop-recommender" element={<CropRecommender />} />
-        <Route path="/results" element={<Results />} />
-        <Route path="/soil-reports" element={<SoilReports />} />
-        <Route path="/feedback" element={<Feedback />} />
-        <Route path="/contact" element={<Contact />} />
+
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/weather" element={<Weather />} />
+          <Route path="/crop-recommender" element={<CropRecommender />} />
+          <Route path="/fertilizer-prediction" element={<FertilizerPrediction />} />
+          <Route path="/results" element={<Results />} />
+          <Route path="/soil-reports" element={<SoilReports />} />
+          <Route path="/feedback" element={<Feedback />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/market-rates" element={<MarketRates />} />
+        </Route>
+
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
 // Add a request interceptor to attach the token if it exists
@@ -9,7 +9,10 @@ api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
         if (token) {
+            console.log('Attaching token to request:', token.substring(0, 10) + '...');
             config.headers.Authorization = `Bearer ${token}`;
+        } else {
+            console.log('No token found in localStorage');
         }
         return config;
     },

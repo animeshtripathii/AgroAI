@@ -7,9 +7,9 @@ const User = require('../models/User');
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, city, state } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !city || !state) {
         res.status(400);
         throw new Error('Please add all fields');
     }
@@ -31,6 +31,8 @@ const registerUser = asyncHandler(async (req, res) => {
         name,
         email,
         password: hashedPassword,
+        city,
+        state,
     });
 
     if (user) {
@@ -38,6 +40,8 @@ const registerUser = asyncHandler(async (req, res) => {
             _id: user.id,
             name: user.name,
             email: user.email,
+            city: user.city,
+            state: user.state,
             image: user.image,
             token: generateToken(user._id),
         });
@@ -61,6 +65,8 @@ const loginUser = asyncHandler(async (req, res) => {
             _id: user._id,
             name: user.name,
             email: user.email,
+            city: user.city,
+            state: user.state,
             image: user.image,
             token: generateToken(user._id),
         });
@@ -74,25 +80,48 @@ const loginUser = asyncHandler(async (req, res) => {
 // @route   PUT /api/auth/profile
 // @access  Private
 const updateUserProfile = asyncHandler(async (req, res) => {
+    console.log('Update Profile Request Headers Content-Type:', req.headers['content-type']);
     console.log('Update Profile Request Body:', req.body);
     console.log('Update Profile Request File:', req.file);
     const user = await User.findById(req.user._id);
 
     if (user) {
-        user.name = req.body.name || user.name;
-        user.email = req.body.email || user.email;
+        if (req.body.name !== undefined) {
+            user.name = req.body.name;
+        }
 
-        if (req.file) {
-            user.image = `http://localhost:5000/uploads/${req.file.filename}`;
-        } else if (req.body.imageUrl) {
-            user.image = req.body.imageUrl;
-        } else if (req.body.image) {
-            user.image = req.body.image;
+        if (req.body.email !== undefined) {
+            const emailExists = await User.findOne({
+                email: req.body.email,
+                _id: { $ne: user._id }
+            });
+
+            if (emailExists) {
+                res.status(400);
+                throw new Error('Email already in use');
+            }
+            user.email = req.body.email;
         }
 
         if (req.body.password) {
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(req.body.password, salt);
+        }
+
+        if (req.file) {
+            user.image = `${process.env.BASE_URL}/uploads/${req.file.filename}`;
+        } else if (req.body.imageUrl) {
+            user.image = req.body.imageUrl;
+        } else if (req.body.image && req.body.image !== user.image) {
+            user.image = req.body.image;
+        }
+
+        if (req.body.city !== undefined) {
+            user.city = req.body.city;
+        }
+
+        if (req.body.state !== undefined) {
+            user.state = req.body.state;
         }
 
         const updatedUser = await user.save();
@@ -101,6 +130,8 @@ const updateUserProfile = asyncHandler(async (req, res) => {
             _id: updatedUser._id,
             name: updatedUser.name,
             email: updatedUser.email,
+            city: updatedUser.city,
+            state: updatedUser.state,
             image: updatedUser.image,
             token: generateToken(updatedUser._id),
         });
@@ -117,8 +148,24 @@ const generateToken = (id) => {
     });
 };
 
+// @desc    Delete user account
+// @route   DELETE /api/auth/profile
+// @access  Private
+const deleteUser = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+        await user.deleteOne();
+        res.json({ message: 'User removed' });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
 module.exports = {
     registerUser,
     loginUser,
     updateUserProfile,
+    deleteUser,
 };
