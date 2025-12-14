@@ -109,7 +109,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         }
 
         if (req.file) {
-            user.image = `${process.env.BASE_URL}/uploads/${req.file.filename}`;
+            user.image = req.file.path; // Cloudinary returns the URL in path
         } else if (req.body.imageUrl) {
             user.image = req.body.imageUrl;
         } else if (req.body.image && req.body.image !== user.image) {

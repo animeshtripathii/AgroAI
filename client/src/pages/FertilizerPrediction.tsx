@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { toast } from "sonner";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const FertilizerPrediction = () => {
     const navigate = useNavigate();
@@ -98,6 +99,7 @@ const FertilizerPrediction = () => {
 
     return (
         <div className="h-screen overflow-hidden bg-background flex flex-col">
+            <LoadingScreen isLoading={isLoading} />
             <Navbar />
 
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 h-full overflow-hidden">
@@ -164,10 +166,10 @@ const FertilizerPrediction = () => {
                                 variant="outline"
                                 onClick={handleAutoFill}
                                 disabled={isAutoFilling}
-                                className="gap-2 border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800"
+                                className="gap-2 border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 dark:bg-green-900/20 dark:border-green-500/30 dark:text-green-400 dark:hover:bg-green-900/40 transition-colors"
                             >
                                 {isAutoFilling ? (
-                                    <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+                                    <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin dark:border-green-400 dark:border-t-transparent" />
                                 ) : (
                                     <CloudSun className="w-4 h-4" />
                                 )}

@@ -16,9 +16,11 @@ import Results from "./pages/Results";
 import SoilReports from "./pages/SoilReports";
 import Feedback from "./pages/Feedback";
 import Contact from "./pages/Contact";
-import MarketRates from "./pages/MarketRates";
+
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import FallingLeafLoader from "./components/FallingLeafLoader";
+import { useState } from "react";
 
 const queryClient = new QueryClient();
 
@@ -43,7 +45,7 @@ const AnimatedRoutes = () => {
           <Route path="/soil-reports" element={<SoilReports />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/market-rates" element={<MarketRates />} />
+
         </Route>
 
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
@@ -53,16 +55,21 @@ const AnimatedRoutes = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AnimatedRoutes />
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      {showSplash && <FallingLeafLoader onComplete={() => setShowSplash(false)} />}
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AnimatedRoutes />
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

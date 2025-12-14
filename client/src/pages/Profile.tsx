@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Camera, Link as LinkIcon, User, Mail, Lock } from "lucide-react";
+import { Camera, Link as LinkIcon, User, Mail, Lock, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/services/api";
 import Navbar from "@/components/Navbar";
@@ -80,6 +80,7 @@ const Profile = () => {
             toast.success("Profile updated successfully");
             setFormData((prev) => ({ ...prev, password: "", confirmPassword: "" }));
             setSelectedFile(null);
+            setTimeout(() => navigate("/dashboard"), 1000); // Redirect after short delay
         } catch (error: any) {
             console.error(error);
             toast.error(error.response?.data?.message || "Failed to update profile");
@@ -92,6 +93,13 @@ const Profile = () => {
         <div className="min-h-screen bg-background no-scrollbar overflow-y-auto">
             <Navbar />
             <div className="container mx-auto px-4 py-8 max-w-4xl">
+                <Button
+                    variant="ghost"
+                    onClick={() => navigate("/dashboard")}
+                    className="mb-6 gap-2 pl-0 hover:pl-2 transition-all hover:bg-transparent text-muted-foreground hover:text-foreground"
+                >
+                    <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+                </Button>
                 <Card className="p-8 shadow-lg border-border/50">
                     <div className="text-center mb-8">
                         <h1 className="text-3xl font-bold text-foreground">Edit Profile</h1>

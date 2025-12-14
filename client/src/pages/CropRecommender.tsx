@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import api from "@/services/api";
 import { toast } from "sonner";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const CropRecommender = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const CropRecommender = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isAutoFilling, setIsAutoFilling] = useState(false);
-  
+
 
   const handleAutoFill = async () => {
     const userData = localStorage.getItem("user");
@@ -114,7 +115,8 @@ const CropRecommender = () => {
         state: {
           formData,
           prediction: { prediction: predictedCrop },
-          recommendationId: data._id
+          recommendationId: data._id,
+          type: "crop"
         }
       });
     } catch (error: any) {
@@ -130,7 +132,8 @@ const CropRecommender = () => {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-background flex flex-col">
+    <div className="flex flex-col h-screen overflow-hidden bg-background relative selection:bg-green-500/20">
+      <LoadingScreen isLoading={isLoading} />
       <Navbar />
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 h-full overflow-hidden">
@@ -180,16 +183,16 @@ const CropRecommender = () => {
         </div>
 
         {/* Right Side - Form */}
-        <div className="lg:col-span-7 h-full overflow-y-auto bg-slate-50 p-6 lg:p-12 flex items-center justify-center">
+        <div className="lg:col-span-7 h-full overflow-y-auto bg-slate-50 p-6 lg:p-12 block">
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="w-full max-w-2xl"
+            className="w-full max-w-2xl mx-auto"
           >
             <div className="mb-8 flex justify-between items-end">
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-2">Enter Parameters</h2>
+                <h2 className="text-3xl font-bold text-slate-900 mb-2">Crop Predictor</h2>
                 <p className="text-slate-500">Fill in the details below to get your recommendation.</p>
               </div>
               <Button
@@ -197,10 +200,10 @@ const CropRecommender = () => {
                 variant="outline"
                 onClick={handleAutoFill}
                 disabled={isAutoFilling}
-                className="gap-2 border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800"
+                className="gap-2 border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 dark:bg-green-900/20 dark:border-green-500/30 dark:text-green-400 dark:hover:bg-green-900/40 transition-colors"
               >
                 {isAutoFilling ? (
-                  <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin dark:border-green-400 dark:border-t-transparent" />
                 ) : (
                   <CloudSun className="w-4 h-4" />
                 )}
@@ -369,7 +372,7 @@ const CropRecommender = () => {
                   ) : (
                     <>
                       <Sparkles className="w-5 h-5 mr-2" />
-                      Get Recommendation
+                      Predict Crop
                     </>
                   )}
                 </Button>

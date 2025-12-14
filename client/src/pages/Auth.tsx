@@ -40,16 +40,24 @@ const Auth = () => {
                     email: formData.email,
                     password: formData.password,
                 });
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data));
-                toast.success("Login successful!");
-                navigate("/dashboard");
+                if (data.token) {
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("user", JSON.stringify(data));
+                    toast.success("Login successful!");
+                    navigate("/dashboard");
+                } else {
+                    toast.error("Login failed: No token received");
+                }
             } else {
                 const { data } = await api.post("/auth/register", formData);
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data));
-                toast.success("Registration successful!");
-                navigate("/dashboard");
+                if (data.token) {
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("user", JSON.stringify(data));
+                    toast.success("Registration successful!");
+                    navigate("/dashboard");
+                } else {
+                    toast.error("Registration failed: No token received");
+                }
             }
         } catch (error: any) {
             console.error(error);
