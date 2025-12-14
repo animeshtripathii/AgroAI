@@ -66,8 +66,102 @@ const Auth = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background p-4 overflow-hidden">
-            <div className="relative w-full max-w-[1000px] min-h-[600px] bg-card rounded-2xl shadow-2xl overflow-hidden flex">
+        <div className="min-h-screen bg-background flex items-center justify-center p-0 md:p-4 overflow-hidden">
+
+            {/* Mobile Layout */}
+            <div className="md:hidden w-full h-screen flex flex-col bg-background">
+                {/* Header Image Section */}
+                <div className="relative h-[35vh] w-full shrink-0">
+                    <img
+                        src={isLogin ? "https://images.unsplash.com/photo-1574943320219-553eb213f72d" : "https://images.unsplash.com/photo-1560493676-04071c5f467b"}
+                        alt="Background"
+                        className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/40" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6 text-center z-10">
+                        <div className="w-12 h-12 bg-white/20 rounded-xl backdrop-blur-sm flex items-center justify-center mb-4">
+                            <Wheat className="w-6 h-6 text-white" />
+                        </div>
+                        <h2 className="text-2xl font-bold mb-2">{isLogin ? "Welcome Back!" : "Join Us!"}</h2>
+                        <p className="text-white/90 text-sm max-w-[250px]">
+                            {isLogin ? "Enter your details to access your account" : "Start your smart farming journey today"}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Form Section */}
+                <div className="flex-1 bg-card -mt-8 rounded-t-[32px] relative z-20 p-6 pt-8 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] overflow-y-auto">
+                    <div className="max-w-sm mx-auto">
+                        <form className="space-y-4" onSubmit={handleAuth}>
+                            {!isLogin && (
+                                <div className="space-y-2">
+                                    <Input
+                                        name="name"
+                                        placeholder="Full Name"
+                                        className="h-11 bg-muted/50"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        required={!isLogin}
+                                    />
+                                </div>
+                            )}
+
+                            <div className="space-y-2">
+                                <Input
+                                    name="email"
+                                    placeholder="Email"
+                                    type="email"
+                                    className="h-11 bg-muted/50"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className="relative">
+                                    <Input
+                                        name="password"
+                                        placeholder="Password"
+                                        type={showPassword ? "text" : "password"}
+                                        className="h-11 bg-muted/50 pr-10"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {isLogin && (
+                                <div className="flex justify-end">
+                                    <a href="#" className="text-sm text-primary hover:underline">Forgot Password?</a>
+                                </div>
+                            )}
+
+                            <Button className="w-full h-11 text-base mt-4" size="lg" type="submit">
+                                {isLogin ? "Log In" : "Sign Up"}
+                            </Button>
+
+                            <div className="text-center text-sm text-muted-foreground pt-4">
+                                {isLogin ? "Don't have an account? " : "Already have an account? "}
+                                <button type="button" onClick={toggleMode} className="text-primary font-medium hover:underline">
+                                    {isLogin ? "Sign Up" : "Log In"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {/* Desktop Layout */}
+            <div className="hidden md:flex relative w-full max-w-[1000px] min-h-[600px] bg-card rounded-2xl shadow-2xl overflow-hidden">
 
                 {/* Sign Up Form Container (Left Side) */}
                 <div className="w-1/2 h-full absolute left-0 top-0 flex items-center justify-center p-12">
@@ -193,7 +287,9 @@ const Auth = () => {
                                     </button>
                                 </div>
                             </div>
-
+                            <div className="flex justify-end">
+                                <a href="#" className="text-sm text-primary hover:underline">Forgot Password?</a>
+                            </div>
                             <Button className="w-full h-11 text-base mt-2" size="lg" type="submit">Log In</Button>
                         </form>
 
