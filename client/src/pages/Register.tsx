@@ -4,6 +4,14 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Wheat, Eye, EyeOff } from "lucide-react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { State, City } from "country-state-city";
 import api from "@/services/api";
 import { toast } from "sonner";
 
@@ -21,9 +29,33 @@ const Register = () => {
         password: "",
     });
 
+    const [availableStates, setAvailableStates] = useState<any[]>([]);
+    const [availableCities, setAvailableCities] = useState<any[]>([]);
+
     useEffect(() => {
         setIsLogin(location.pathname === "/login");
     }, [location.pathname]);
+
+    useEffect(() => {
+        // Load states for India by default
+        const states = State.getStatesOfCountry("IN");
+        setAvailableStates(states);
+    }, []);
+
+    useEffect(() => {
+        if (formData.state) {
+            // Find state code to get cities
+            const selectedState = availableStates.find(s => s.name === formData.state);
+            if (selectedState) {
+                const cities = City.getCitiesOfState("IN", selectedState.isoCode);
+                setAvailableCities(cities);
+            } else {
+                setAvailableCities([]);
+            }
+        } else {
+            setAvailableCities([]);
+        }
+    }, [formData.state, availableStates]);
 
     const toggleMode = () => {
         const newPath = isLogin ? "/register" : "/login";
@@ -34,24 +66,65 @@ const Register = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleStateChange = (value: string) => {
+        setFormData({ ...formData, state: value, city: "" }); // Reset city when state changes
+    };
+
+    const handleCityChange = (value: string) => {
+        setFormData({ ...formData, city: value });
+    };
+
+    const validatePassword = (password: string) => {
+        // Min 8 chars, 1 uppercase, 1 lowercase, 1 special/number
+        // Regex: At least one lowercase, one uppercase, one digit or special char, min 8 length
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\d\W])[A-Za-z\d\W]{8,}$/;
+        return regex.test(password);
+    };
+
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Basic Validation
+        if (!formData.email || !formData.password) {
+            toast.error("Please fill in all required fields.");
+            return;
+        }
+
+        if (!isLogin) {
+            if (!formData.name || !formData.state || !formData.city) {
+                toast.error("Please fill in all fields (Name, State, City).");
+                return;
+            }
+            if (!validatePassword(formData.password)) {
+                toast.error("Password must be at least 8 chars, involve an uppercase, a lowercase, and a number/symbol.");
+                return;
+            }
+        }
+
         try {
             if (isLogin) {
                 const { data } = await api.post("/auth/login", {
                     email: formData.email,
                     password: formData.password,
                 });
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data));
-                toast.success("Login successful!");
-                navigate("/dashboard");
+                if (data.token) {
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("user", JSON.stringify(data));
+                    toast.success("Login successful!");
+                    navigate("/dashboard");
+                } else {
+                    toast.error("Login failed: No token received");
+                }
             } else {
                 const { data } = await api.post("/auth/register", formData);
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data));
-                toast.success("Registration successful!");
-                navigate("/dashboard");
+                if (data.token) {
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("user", JSON.stringify(data));
+                    toast.success("Registration successful!");
+                    navigate("/dashboard");
+                } else {
+                    toast.error("Registration failed: No token received");
+                }
             }
         } catch (error: any) {
             console.error(error);
@@ -95,7 +168,7 @@ const Register = () => {
                                         className="h-11 bg-muted/50"
                                         value={formData.name}
                                         onChange={handleChange}
-                                        required
+                                        required={!isLogin}
                                     />
                                 </div>
                             )}
@@ -115,24 +188,32 @@ const Register = () => {
                             {!isLogin && (
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Input
-                                            name="city"
-                                            placeholder="City"
-                                            className="h-11 bg-muted/50"
-                                            value={formData.city}
-                                            onChange={handleChange}
-                                            required
-                                        />
+                                        <Select onValueChange={handleStateChange} value={formData.state}>
+                                            <SelectTrigger className="h-11 bg-muted/50">
+                                                <SelectValue placeholder="State" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {availableStates.map((state) => (
+                                                    <SelectItem key={state.isoCode} value={state.name}>
+                                                        {state.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Input
-                                            name="state"
-                                            placeholder="State"
-                                            className="h-11 bg-muted/50"
-                                            value={formData.state}
-                                            onChange={handleChange}
-                                            required
-                                        />
+                                        <Select onValueChange={handleCityChange} value={formData.city} disabled={!formData.state}>
+                                            <SelectTrigger className="h-11 bg-muted/50">
+                                                <SelectValue placeholder="City" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {availableCities.map((city) => (
+                                                    <SelectItem key={city.name} value={city.name}>
+                                                        {city.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                 </div>
                             )}
@@ -220,28 +301,38 @@ const Register = () => {
                                     required
                                 />
                             </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Input
-                                        name="city"
-                                        placeholder="City"
-                                        className="h-11 bg-muted/50"
-                                        value={formData.city}
-                                        onChange={handleChange}
-                                        required={!isLogin}
-                                    />
+                                    <Select onValueChange={handleStateChange} value={formData.state}>
+                                        <SelectTrigger className="h-11 bg-muted/50">
+                                            <SelectValue placeholder="State" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableStates.map((state) => (
+                                                <SelectItem key={state.isoCode} value={state.name}>
+                                                    {state.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Input
-                                        name="state"
-                                        placeholder="State"
-                                        className="h-11 bg-muted/50"
-                                        value={formData.state}
-                                        onChange={handleChange}
-                                        required={!isLogin}
-                                    />
+                                    <Select onValueChange={handleCityChange} value={formData.city} disabled={!formData.state}>
+                                        <SelectTrigger className="h-11 bg-muted/50">
+                                            <SelectValue placeholder="City" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableCities.map((city) => (
+                                                <SelectItem key={city.name} value={city.name}>
+                                                    {city.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
+
                             <div className="space-y-2">
                                 <div className="relative">
                                     <Input

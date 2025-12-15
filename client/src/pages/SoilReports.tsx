@@ -104,6 +104,21 @@ const SoilReports = () => {
 
       doc.save(`Soil_Report_${report.fieldName.replace(/\s+/g, '_')}.pdf`);
       toast.success("Report generated successfully!");
+
+      // Trigger Email
+      try {
+        await api.post("/predict/email-report", {
+          ...report,
+          cropName: report.predictedCrop,
+          soilData: report,
+          aiReport: data.report
+        });
+        toast.success("Report emailed to you!");
+      } catch (emailError) {
+        console.error("Failed to email report", emailError);
+        toast.error("Report generated but failed to email.");
+      }
+
     } catch (error) {
       console.error("Error generating PDF:", error);
       toast.error("Failed to generate report");

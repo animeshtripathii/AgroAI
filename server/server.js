@@ -19,6 +19,7 @@ app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/predict', require('./routes/predictRoutes'));
 app.use('/api/market', require('./routes/marketRoutes'));
+app.use('/api/feedback', require('./routes/feedbackRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');

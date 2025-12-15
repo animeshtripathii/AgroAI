@@ -8,6 +8,7 @@ import { MessageSquare, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
 import AgriculturalBackground from "@/components/AgriculturalBackground";
+import api from "@/services/api";
 
 const Feedback = () => {
   const { toast } = useToast();
@@ -19,18 +20,35 @@ const Feedback = () => {
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Send feedback to backend
-    console.log("Feedback submitted:", { ...formData, rating });
+    try {
+      if (rating === 0) {
+        toast({
+          title: "Rating Required",
+          description: "Please select a star rating before submitting.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    toast({
-      title: "Feedback Submitted",
-      description: "Thank you for your feedback! We'll review it shortly.",
-    });
+      await api.post("/feedback", { ...formData, rating });
 
-    setFormData({ name: "", email: "", subject: "", message: "" });
-    setRating(0);
+      toast({
+        title: "Feedback Submitted",
+        description: "Thank you for your feedback! We'll review it shortly.",
+      });
+
+      setFormData({ name: "", email: "", subject: "", message: "" });
+      setRating(0);
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Submission Failed",
+        description: "Could not send feedback. Please try again later.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
