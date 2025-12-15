@@ -611,6 +611,10 @@ const Results = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
+      // Trigger Email
+      await api.post('/predict/email-report', payload);
+      toast.success("Report emailed successfully!");
+
     } catch (error) {
       console.error("Error downloading PDF:", error);
       toast.error("Failed to download PDF");
