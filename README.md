@@ -77,7 +77,7 @@ PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
 BASE_URL=http://localhost:5173
-CROP_PREDICTION_API_URL=http://127.0.0.1:5000 (or external ML API)
+CROP_PREDICTION_API_URL=https://model-5-v8po.onrender.com/
 GEMINI_API_KEY=your_gemini_api_key
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_key
@@ -101,10 +101,11 @@ npm install
 Create a `.env` file in the `client` directory:
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api
-VITE_FERTILIZER_ML_API_URL=your_fertilizer_api_url
+VITE_FERTILIZER_ML_API_URL=https://model2-2-tz5n.onrender.com/
 VITE_OPENWEATHER_API_URL=https://api.openweathermap.org/data/2.5
 VITE_OPENWEATHER_API_KEY=your_openweather_key
-VITE_CROP_PREDICTION_API_URL=your_crop_prediction_url
+VITE_CROP_PREDICTION_API_URL=https://model-5-v8po.onrender.com/
+VITE_PRODUCTION_API_URL=https://production-model-65zn.onrender.com/
 ```
 
 Start the frontend development server:
@@ -129,3 +130,4 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 ## 📄 License
 
 This project is licensed under the MIT License.
+
