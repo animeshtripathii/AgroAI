@@ -9,7 +9,11 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://agro-ai-d25a.vercel.app', // Replace with your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
+  credentials: true // If your frontend sends cookies/auth headers
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -34,4 +38,5 @@ if (require.main === module) {
 }
 
 module.exports = app;
+
 
