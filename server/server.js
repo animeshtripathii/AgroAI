@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 const path = require('path');
-app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/predict', require('./routes/predictRoutes'));
@@ -34,3 +34,4 @@ if (require.main === module) {
 }
 
 module.exports = app;
+
