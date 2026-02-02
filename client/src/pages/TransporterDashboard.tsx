@@ -85,6 +85,21 @@ const TransporterDashboard = () => {
         }
     };
 
+    /**
+     * Handles the addition of a new vehicle by validating input fields, preparing form data,
+     * sending a POST request to the server, and updating the UI accordingly.
+     * 
+     * - Validates that all required fields in `newVehicle` are filled.
+     * - Appends vehicle data and image (if provided) to a FormData object.
+     * - Sends the data to the `/vehicles` endpoint using a multipart/form-data request.
+     * - On success, displays a success toast, closes the add vehicle modal, refreshes the vehicle list,
+     *   and resets the form fields.
+     * - On failure, displays an error toast with the appropriate message.
+     * 
+     * @async
+     * @function
+     * @returns {Promise<void>}
+     */
     const handleAddVehicle = async () => {
         // Validation
         if (!newVehicle.type || !newVehicle.capacity || !newVehicle.pricePerKm || !newVehicle.driverName || !newVehicle.licensePlate || !newVehicle.city || !newVehicle.state) {
@@ -115,7 +130,8 @@ const TransporterDashboard = () => {
             });
             toast.success("Vehicle added successfully");
             setIsAddOpen(false);
-            fetchData();
+            fetchVehicles();
+            fetchBookings();
             // Reset form
             setNewVehicle({ ...newVehicle, type: "", capacity: "", pricePerKm: "", driverName: "", licensePlate: "", image: "" });
             setSelectedFile(null);
@@ -141,7 +157,8 @@ const TransporterDashboard = () => {
         try {
             await api.put(`/bookings/${id}/status`, { status });
             toast.success(`Booking ${status}`);
-            fetchData();
+            fetchVehicles();
+            fetchBookings();
         } catch (error) {
             toast.error("Failed to update status");
         }
