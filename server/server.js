@@ -10,7 +10,7 @@ connectDB();
 const app = express();
 
 app.use(cors({
-  origin: 'https://agro-ai-d25a.vercel.app', // Replace with your frontend URL
+  origin: "https://agroai-1-8jho.onrender.com",, // Replace with your frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
   credentials: true // If your frontend sends cookies/auth headers
 }));
